@@ -1,16 +1,56 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
-	<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promisify Function</title>
 </head>
-
 <body>
-	<!-- the entire body must be written by student -->
-    <script type="text/javascript" src="./script.js">
-</script>
+  <h1>Promisify Example</h1>
+  <p>Check the console for results.</p>
 
+  <script>
+    // Promisify Function Implementation
+    function promisify(callback) {
+      return function(...args) {
+        return new Promise((resolve, reject) => {
+          // Add the handleErrorAndValue function as the last argument
+          args.push((error, value) => {
+            if (error) {
+              reject(error);  // Reject the promise if there is an error
+            } else {
+              resolve(value);  // Resolve the promise with the value
+            }
+          });
+
+          // Call the original callback with the correct 'this' context and arguments
+          callback.apply(this, args);
+        });
+      };
+    }
+
+    // Example Callback Function (Adder)
+    function adder(x, y, handleErrorAndValue) {
+      const value = x + y;
+      if (typeof value !== 'number') {
+        const error = new Error('Not a number');
+        handleErrorAndValue(error, null);
+      } else {
+        handleErrorAndValue(null, value);
+      }
+    }
+
+    // Promisifying the adder function
+    const promisifiedAdder = promisify(adder);
+
+    // Example Usage
+    promisifiedAdder(1, 2)
+      .then(console.log)  // Logs 3
+      .catch(console.error);
+
+    promisifiedAdder(1, "foobar")
+      .then(console.log)
+      .catch(console.error);  // Logs Error: Not a number
+  </script>
 </body>
-
 </html>
